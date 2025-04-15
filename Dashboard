@@ -1,72 +1,64 @@
-Prescription medication costs, reimbursement amounts, rebate effects, and possible cost savings for Medicaid claims are all examined in this research. By moving from name-brand medications to generics, negotiating better rebate deals, and making the best formulary choices, the objective is to find ways to lower overall pharmacy expenses.
-Key Insights from the Dashboard
+SELECT * FROM `healthcare-analysis-453902.medicaid_claims_data.healthcare_claims`
+LIMIT 10;
+SELECT * FROM `healthcare-analysis-453902.medicaid_claims_data.provider_details`
+LIMIT 10;
+SELECT * FROM `healthcare-analysis-453902.medicaid_claims_data.drug_formulary`
+LIMIT 10;
 
-1).Total Cost vs. Reimbursement (Bar Chart)
+/*Join Healthcare Claims with Drug Formulary*/
 
-Objective: Highlights the difference between total drug cost and reimbursement.
+SELECT 
+    hc.Drug_Name,
+    hc.Drug_Category,
+    hc.Total_Cost,
+    hc.Reimbursement_Amount,
+    df.Brand_Generic,
+    df.Generic_Alternative,
+    df.Rebate_Amount,
+    ROUND(hc.Total_Cost - hc.Reimbursement_Amount, 2) AS Cost_Variance
+FROM `healthcare-analysis-453902.medicaid_claims_data.healthcare_claims` AS hc
+JOIN `healthcare-analysis-453902.medicaid_claims_data.drug_formulary` AS df
+ON hc.Drug_Name = df.Drug_Name
+ORDER BY Cost_Variance DESC
+LIMIT 50;
 
-Findings: Reimbursement amounts are significantly lower than total costs, indicating that Medicaid bears a higher financial burden.
+/*healthcare-analysis-453902.medicaid_claims_data*/
 
-Implication: Policy adjustments may be required to contain costs and ensure reimbursement aligns with actual expenses.
+SELECT 
+  hc.Drug_Name,
+  hc.Drug_Category,
+  df.Brand_Generic,
+  df.Generic_Alternative,
+  Round(SUM(hc.Total_Cost),2)  AS Total_Cost, 
+  Round(SUM(hc.Reimbursement_Amount),2)  AS Reimbursement_Amount,
+  Round(SUM(df.Rebate_Amount),2) AS Total_Rebate_Amount,
+  Round(SUM(hc.Total_Cost - hc.Reimbursement_Amount),2) AS Cost_Variance,
+  Round(SUM(hc.Total_Cost - df.Rebate_Amount),2) AS Potential_Savings
+FROM `healthcare-analysis-453902.medicaid_claims_data.healthcare_claims` as hc
+JOIN `healthcare-analysis-453902.medicaid_claims_data.drug_formulary` as df
+ON hc.Drug_Name = df.Drug_Name
+GROUP BY 
+  hc.Drug_Name,
+  hc.Drug_Category,
+  df.Brand_Generic,
+  df.Generic_Alternative
+ORDER BY Total_Cost DESC;
 
-2).Top 10 Drugs with the Highest Cost Variance (Bar Chart)
+SELECT 
+  hc.Drug_Name,
+  Round(SUM(hc.Total_Cost),2)  AS Total_Cost, 
+  Round(SUM(hc.Reimbursement_Amount),2)  AS Reimbursement_Amount,
+  Round(SUM(df.Rebate_Amount),2) AS Total_Rebate_Amount,
+  Round(SUM(hc.Total_Cost - hc.Reimbursement_Amount),2) AS Cost_Variance,
+  Round(SUM(hc.Total_Cost - df.Rebate_Amount),2) AS Potential_Savings
+FROM `healthcare-analysis-453902.medicaid_claims_data.healthcare_claims` as hc
+JOIN `healthcare-analysis-453902.medicaid_claims_data.drug_formulary` as df
+ON hc.Drug_Name = df.Drug_Name
+GROUP BY 
+  hc.Drug_Name
+ORDER BY Total_Cost DESC;
 
-Objective: Identifies drugs where costs exceed reimbursement amounts.
-
-Findings: Certain drugs have a high variance, meaning Medicaid is paying significantly more out-of-pocket.
-
-Implication: This could indicate inefficiencies in drug pricing, potential fraud, or a need for renegotiating contracts with pharmaceutical manufacturers.
-
-3).Potential Savings by Switching to Generics (Pie Chart)
-
-Objective: Displays cost-saving opportunities by preferring generic drugs over brand-name equivalents.
-
-Findings: Significant cost reductions are possible by shifting to generics, which provide the same therapeutic benefits at a lower price.
-
-Implication: Encouraging the use of generics could reduce Medicaid expenditures and improve budget efficiency.
-
-4).Total Cost Trend Over Time (Line Chart)
-
-Objective: Analyzes prescription drug cost trends over the years.
-
-Findings: A decline in total costs from 2023 to 2024, potentially due to policy changes, increased use of generics, negotiation of drug prices, or fewer approved claims.
-
-Implication: Forecasting for 2025 is necessary to ensure cost trends remain stable and cost-saving measures are maintained.
-
-5).Forecasted Healthcare Costs & Savings (2023-2025) (Multi-line Chart)
-
-Objective: Predicts total cost, reimbursements, and potential savings for 2025.
-
-Findings: An increase in projected savings suggests that cost-management strategies, such as preferring generics, are proving effective.
-
-Implication: If total costs continue to rise, Medicaid may need to implement additional cost-control measures or adjust funding allocations.
-
-Business Problem and Solution
-
-Problem Statement
-
-Medicaid is experiencing high prescription drug costs, with a significant variance between total expenses and reimbursement.
-Certain drugs have disproportionately high costs that could be reduced through strategic interventions.
-Proposed Solution
-
-Identified high-cost drugs that contribute to increased Medicaid expenditures.
-
-Analyzed cost variance to detect inefficiencies in pricing and reimbursement.
-
-Quantified potential savings through a transition to generic alternatives.
-
-Developed data-driven recommendations for Medicaid to:
-
-Renegotiate rebate agreements
-
-Adjust reimbursement policies
-
-Optimize formulary design
-
-Tools & Technologies Used:
-
-SQL (BigQuery) – Query Medicaid claims data and aggregate cost analysis.
-Excel (PivotTables, Formulas, Forecasting) – Perform cost variance calculations and trend analysis.
-Conclusion
-
-This analysis provides actionable insights into prescription drug expenditures and potential cost-saving opportunities. By leveraging data analysis techniques, Medicaid and other healthcare organizations can make informed decisions regarding formulary design, rebate negotiations, and cost control strategies.
+SELECT 
+  Data_Type
+FROM `healthcare-analysis-453902.medicaid_claims_data.INFORMATION_SCHEMA.COLUMNS`
+WHERE Table_Name = 'healthcare_claims' AND Column_Name = 'Total_Cost';

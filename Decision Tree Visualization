@@ -1,0 +1,18 @@
+- Decision Tree Visualization:
+A graphical tree showing the splitting rules used by the model.
+
+---
+
+## 🚀 How to Run
+
+1. Clone the repository:
+ ```bash
+ git clone https://github.com/yourusername/drug-prediction-AI-decision-tree.git
+ cd drug-prediction-AI-decision-tree
+
+pip install -r requirements.txt
+
+python decision_tree_code.py
+
+License
+This project is for educational purposes only and uses public domain data. Please review individual library licenses for additional details.
